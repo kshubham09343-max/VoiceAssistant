@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -21,6 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -164,19 +164,16 @@ fun AssistantScreen(viewModel: VoiceAssistantViewModel, onMicClick: () -> Unit) 
 @Composable
 fun MicButton(listeningState: ListeningState, onClick: () -> Unit) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseScale by if (listeningState == ListeningState.LISTENING) {
-        infiniteTransition.animateFloatAsState(
-            initialValue = 1f,
-            targetValue = 1.25f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(600),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "pulseScale"
-        )
-    } else {
-        remember { mutableStateOf(1f) }
-    }
+    val infinitePulse by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.25f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(600),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseScale"
+    )
+    val pulseScale = if (listeningState == ListeningState.LISTENING) infinitePulse else 1f
 
     val buttonColor = when (listeningState) {
         ListeningState.LISTENING -> Color(0xFFFF5252)
